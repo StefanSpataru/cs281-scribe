@@ -582,5 +582,165 @@ p(x) = \exp\left\{ \sum_{ij} \left( \theta_{ij}^{\uparrow} (x_{ij}, x_{i-1,j} ) 
 \end{align}
 where $A(\theta) =  \log\left(\sum_{x'} \exp\sum_c \theta_c(x'_c)\right)$. Note that $A$ is again very hard to calculate. Also note that the ``missing'' $\theta_{22}^{\downarrow}$ and $\theta_{22}^{\rightarrow}$ in the diagram are given by other $\theta^{\uparrow}$ and $\theta^{\leftarrow}$ so that when we sum over all $i$ and $j$ we are not double counting any of the connections. 
 
+\begin{exercise}
+
+Prove the following:
+
+\begin{enumerate}
+
+\item[(a)]
+
+(Murphy Exercise 10.9) Let $M$ be the moralization of a DAG $G$. Show that $CI(M) \subseteq CI(G)$, where $CI(T)$ is the set of conditional independences implied by the model $T$. In other terms, moralization is an $I$-map.
+
+\item[(b)]
+
+Show that $CI(G) \subseteq CI(M)$ is not true in general. 
+
+\end{enumerate}
+
+\end{exercise}
+
+\begin{proof}
+
+\begin{enumerate}
+
+\item[(a)]
+
+Suppose that variables $A$ and $B$ are independent given the set of variables $S$ in the model $M$. We aim to prove that $A$ and $B$ are conditionally independent in $G$ as well.
+
+Suppose that $A$ and $B$ are not conditionally independent in model $D$. This means that there exists a directed path $A = A_0 \leftrightarrow A_1 \leftrightarrow A_2 \leftrightarrow ... \leftrightarrow A_{n-1} \leftrightarrow B = A_n$ that is not blocked. In the context of directed graphical models, this means that they are $d$-separated. Arrows are oriented, we just don't know in what direction. 
+
+\begin{center}
+\begin{tikzpicture}
+
+  \node (A) [latent] {$A$};
+  \node (A1) [latent, right=of A, xshift=0.85cm] {$A_1$};
+  \node (A2) [latent, right=of A1, xshift=0.85cm] {\ldots};
+  \node (B1) [latent, right=of A2, xshift=0.85cm] {$A_{n-1}$};
+  \node (B2) [latent, right=of B1, xshift=0.85cm] {$B$};
+  
+
+  \edge {A} {A1};
+  \edge {A2} {A1};
+  \edge {A2} {B1};
+  \edge {B1} {B2};
+
+\end{tikzpicture}
+\end{center}
+
+
+We want to prove this is a contradiction. Consider the following path in $M$. For every $i =1,n-1$, look at the direction of the arrows $A_{i-1} \to A_{i} \to A_{i+1}$. If the arrows are converging, drop $A_i$ from the path. Otherwise, keep $A_i$. Pictured below is the removal case. All of the other cases of arrows result in keeping the node $A_i$.
+
+\begin{center}
+\begin{tikzpicture}
+
+  \node (k1) [latent] {$A_{i+1}$};
+  \node (k3) [latent, right=of k1,xshift = 0.85cm] {$A_{i}$};
+  \node (k2) [latent, right=of k3, xshift=0.85cm] {$A_{i-1}$};
+
+  \edge {k1} {k3};
+  \edge {k2} {k3};
+
+\end{tikzpicture}
+\end{center}
+
+
+
+First, remark we can't drop consecutive vertices in the path. If $A_{i-1}$ and $A_i$ can't both have converging arrows, because the arrow between them will point exactly one of them. Next, remark one can drop $A_i$ when the arrows considered above are converging because if this happens $M$ will have an edge between $A_{i-1}$ and $A_{i+1}$ since they have $A_i$ as a common children. Moreover, $A_{i-1}$ and $A_i$ can't both have converging arrows, because the arrow between them will point exactly one of them.
+
+
+
+Now, we will get a smaller undirected path $A = B_0 \to B_1 \to B_2\to ... \to B_m = B$ in $M$.
+
+\begin{center}
+\begin{tikzpicture}
+
+  \node (A) [latent] {$A$};
+  \node (A1) [latent, right=of A, xshift=0.85cm] {$B_1$};
+  \node (A2) [latent, right=of A1, xshift=0.85cm] {\ldots};
+  \node (B1) [latent, right=of A2, xshift=0.85cm] {$B_{m-1}$};
+  \node (B2) [latent, right=of B1, xshift=0.85cm] {$B$};
+
+\edge [-] {A} {A1};
+\edge [-] {A1} {A2};
+\edge [-] {A2} {B1};
+\edge [-] {B1} {B2};
+
+\end{tikzpicture}
+\end{center}
+
+I claim this is unblocked. Suppose it is blocked at $B_i$. Then, $B_i$ is in the evidence. Consider the equivalent $A_j = B_i$ in $G$. Then, $A_j$ has non-converging arrows, for example, like the ones below.
+
+\begin{center}
+\begin{tikzpicture}
+
+  \node (k1) [latent] {$A_{i+1}$};
+  \node (k3) [latent, right=of k1,xshift = 0.85cm] {$A_{i}$};
+  \node (k2) [latent, right=of k3, xshift=0.85cm] {$A_{i-1}$};
+
+  \edge {k3} {k1};
+  \edge {k2} {k3};
+
+\end{tikzpicture}
+\end{center}
+
+
+
+Since $A_j$ is in the evidence, and has non-converging arrows, then the path we described in $M$ is blocked, a contradiction. This shows that $CI(M) \subseteq CI(G)$. 
+
+\item[(b)]
+
+Consider the following $DGM$, $G$:
+
+\begin{center}
+\begin{tikzpicture}
+
+\node (k2) [latent] {$B$};
+ 
+
+   \node (k3) [latent, below=of k2] {$C$};
+   \node (k1) [latent, right=of k2] {$A$};
+     \node (k4) [latent, below=of k1] {$D$};
+  
+
+  \edge {k1} {k2};
+  \edge {k3} {k2};
+  \edge {k2} {k4};
+
+\end{tikzpicture}
+\end{center}
+
+Moralizing this graph leads to the undirected graph $M$:
+
+ \begin{center}
+\begin{tikzpicture}
+
+\node (k2) [latent] {$B$};
+ 
+
+   \node (k3) [latent, below=of k2] {$C$};
+   \node (k1) [latent, right=of k2] {$A$};
+     \node (k4) [latent, below=of k1] {$D$};
+  
+
+  \edge [-] {k1} {k2};
+  \edge [-] {k3} {k2};
+  \edge [-] {k2} {k4};
+  \edge [-] {k1} {k3};
+
+\end{tikzpicture}
+\end{center}
+
+Remark that in $G$, $A \bot C \mid D$, given that the only path between $A$ and $C$, $A \rightarrow B \leftarrow C$, cannot be blocked at $B$, because by $d$-separation this is blocked if and only if $B$ and none of its descendants are in the evidence. But $B$'s children $D$ is in the evidence.
+
+On the other hand, is is easy to see that in $M$, $A$ and $C$ are not conditionally independent given $D$, given that the path $A$ to $C$ is unblocked. 
+
+
+
+\end{enumerate}
+
+\end{proof}
+
+
 \end{document}
 
